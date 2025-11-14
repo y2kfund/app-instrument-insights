@@ -17,7 +17,6 @@ const props = withDefaults(defineProps<InstrumentInsightProps>(), {
 
 <template>
   <div class="instrument-insights-for-single-instrument-view">
-    <h2>Instrument Insight for {{ props.symbolRoot }}</h2>
     
     <div class="boxes-container">
       <KeyFactors 
@@ -40,7 +39,6 @@ const props = withDefaults(defineProps<InstrumentInsightProps>(), {
 .boxes-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-  margin-top: 24px;
+  gap: 1.25rem;
 }
 </style>

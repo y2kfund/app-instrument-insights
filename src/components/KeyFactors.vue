@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useSupabase } from '@y2kfund/core' // Adjust import path as needed
 
 interface KeyFactor {
@@ -20,10 +20,11 @@ const props = defineProps<Props>()
 const supabase = useSupabase()
 
 const factors = ref<KeyFactor[]>([])
-const newFactorText = ref('')
 const editingId = ref<string | null>(null)
 const editText = ref('')
 const hoveredFactor = ref<KeyFactor | null>(null)
+const isAddingNew = ref(false)
+const newFactorText = ref('')
 
 const fetchFactors = async () => {
   const { data, error } = await supabase
@@ -38,8 +39,19 @@ const fetchFactors = async () => {
   }
 }
 
+const startAddNew = async () => {
+  isAddingNew.value = true
+  newFactorText.value = ''
+  await nextTick()
+  const input = document.querySelector('.new-factor-input') as HTMLInputElement
+  input?.focus()
+}
+
 const addFactor = async () => {
-  if (!newFactorText.value.trim()) return
+  if (!newFactorText.value.trim()) {
+    isAddingNew.value = false
+    return
+  }
   
   const { data, error } = await supabase
     .schema('hf')
@@ -54,16 +66,29 @@ const addFactor = async () => {
   if (!error && data) {
     factors.value.unshift(data[0])
     newFactorText.value = ''
+    isAddingNew.value = false
   }
 }
 
-const startEdit = (factor: KeyFactor) => {
+const cancelAddNew = () => {
+  isAddingNew.value = false
+  newFactorText.value = ''
+}
+
+const startEdit = async (factor: KeyFactor) => {
   editingId.value = factor.id
   editText.value = factor.bullet_text
+  await nextTick()
+  const input = document.querySelector(`#edit-${factor.id}`) as HTMLInputElement
+  input?.focus()
+  input?.select()
 }
 
 const saveEdit = async (factorId: string) => {
-  if (!editText.value.trim()) return
+  if (!editText.value.trim()) {
+    cancelEdit()
+    return
+  }
   
   const { error } = await supabase
     .schema('hf')
@@ -105,20 +130,31 @@ onMounted(() => {
 
 <template>
   <div class="key-factors-box">
-    <h3 class="box-title">Key Factors</h3>
-    
-    <div class="add-factor">
-      <input
-        v-model="newFactorText"
-        @keyup.enter="addFactor"
-        type="text"
-        placeholder="Add a new key factor..."
-        class="factor-input"
-      />
-      <button @click="addFactor" class="add-button">Add</button>
+    <div class="header">
+      <h3 class="box-title">Key Factors</h3>
+      <button @click="startAddNew" class="add-icon-button" title="Add new factor">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
 
     <ul class="factors-list">
+      <!-- New factor input -->
+      <li v-if="isAddingNew" class="factor-item new-factor">
+        <span class="bullet">•</span>
+        <input
+          v-model="newFactorText"
+          @keyup.enter="addFactor"
+          @keyup.esc="cancelAddNew"
+          @blur="addFactor"
+          type="text"
+          placeholder="Type new factor and press Enter..."
+          class="new-factor-input"
+        />
+      </li>
+
+      <!-- Existing factors -->
       <li
         v-for="factor in factors"
         :key="factor.id"
@@ -130,22 +166,21 @@ onMounted(() => {
         
         <div v-if="editingId === factor.id" class="edit-mode">
           <input
+            :id="`edit-${factor.id}`"
             v-model="editText"
             @keyup.enter="saveEdit(factor.id)"
             @keyup.esc="cancelEdit"
+            @blur="saveEdit(factor.id)"
             type="text"
             class="edit-input"
           />
-          <button @click="saveEdit(factor.id)" class="save-button">Save</button>
-          <button @click="cancelEdit" class="cancel-button">Cancel</button>
         </div>
         
         <div v-else class="view-mode">
-          <span class="factor-text">{{ factor.bullet_text }}</span>
-          <button @click="startEdit(factor)" class="edit-button">Edit</button>
+          <span class="factor-text" @click="startEdit(factor)">{{ factor.bullet_text }}</span>
         </div>
 
-        <div v-if="hoveredFactor?.id === factor.id" class="tooltip">
+        <div v-if="hoveredFactor?.id === factor.id && editingId !== factor.id" class="tooltip">
           Added by: {{ factor.created_by }}<br />
           {{ formatDate(factor.created_at) }}
         </div>
@@ -159,43 +194,50 @@ onMounted(() => {
   background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
   border: 2px solid #2196f3;
   border-radius: 12px;
-  padding: 24px;
-  margin: 16px 0;
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.add-icon-button svg {
+    width: 16px;
+    height: 16px;
 }
 
 .box-title {
   font-size: 18px;
   font-weight: 600;
-  margin: 0 0 16px 0;
+  margin: 0;
   color: #333;
 }
 
-.add-factor {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.factor-input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.add-button {
-  padding: 8px 16px;
+.add-icon-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
   background-color: #2196f3;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 50%;
   cursor: pointer;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.add-button:hover {
+.add-icon-button:hover {
   background-color: #1976d2;
+  transform: scale(1.1);
+}
+
+.add-icon-button:active {
+  transform: scale(0.95);
 }
 
 .factors-list {
@@ -208,8 +250,6 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
@@ -217,75 +257,64 @@ onMounted(() => {
   border-bottom: none;
 }
 
+.new-factor {
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .bullet {
   font-size: 20px;
-  line-height: 1.2;
+  line-height: 1 rem;
   color: #2196f3;
+  flex-shrink: 0;
 }
 
 .view-mode {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .factor-text {
   flex: 1;
-  line-height: 1.5;
-}
-
-.edit-button,
-.save-button,
-.cancel-button {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 4px;
+  line-height: 1 rem;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  display: block;
 }
 
-.edit-button {
-  background-color: #fff;
-  color: #2196f3;
-  border: 1px solid #2196f3;
-}
-
-.edit-button:hover {
-  background-color: #e3f2fd;
+.factor-text:hover {
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .edit-mode {
   flex: 1;
-  display: flex;
-  gap: 8px;
 }
 
-.edit-input {
-  flex: 1;
+.edit-input,
+.new-factor-input {
+  width: 100%;
   padding: 6px 10px;
-  border: 1px solid #ccc;
+  border: 2px solid #2196f3;
   border-radius: 4px;
   font-size: 14px;
+  outline: none;
+  background-color: white;
 }
 
-.save-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.save-button:hover {
-  background-color: #45a049;
-}
-
-.cancel-button {
-  background-color: #f44336;
-  color: white;
-}
-
-.cancel-button:hover {
-  background-color: #da190b;
+.edit-input:focus,
+.new-factor-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .tooltip {
@@ -300,5 +329,6 @@ onMounted(() => {
   white-space: nowrap;
   z-index: 10;
   margin-top: 4px;
+  pointer-events: none;
 }
 </style>
