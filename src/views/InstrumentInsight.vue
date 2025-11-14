@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
-//import { useCurrentPositionQuery } from '@y2kfund/core/currentPositionsForSingleInstrument'
+import KeyFactors from '../components/KeyFactors.vue'
+import ComingSoonBox from '../components/ComingSoonBox.vue'
 
 interface InstrumentInsightProps {
   symbolRoot: string
@@ -17,7 +18,15 @@ const props = withDefaults(defineProps<InstrumentInsightProps>(), {
 <template>
   <div class="instrument-insights-for-single-instrument-view">
     <h2>Instrument Insight for {{ props.symbolRoot }}</h2>
-    <!-- Add your component UI here -->
+    
+    <div class="boxes-container">
+      <KeyFactors 
+        :symbol-root="props.symbolRoot" 
+        :user-id="props.userId || ''"
+      />
+      
+      <ComingSoonBox title="Profit and Loss" />
+    </div>
   </div>
 </template>
 
@@ -27,4 +36,11 @@ const props = withDefaults(defineProps<InstrumentInsightProps>(), {
 
 <style scoped>
 @import '../styles/scoped-styles.css';
+
+.boxes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
 </style>
