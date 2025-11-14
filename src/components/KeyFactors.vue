@@ -29,7 +29,7 @@ const newFactorText = ref('')
 const fetchFactors = async () => {
   const { data, error } = await supabase
     .schema('hf')
-    .from('key_factors')
+    .from('key_factors_with_users')
     .select('*')
     .eq('symbol_root', props.symbolRoot)
     .order('created_at', { ascending: false })
@@ -181,7 +181,7 @@ onMounted(() => {
         </div>
 
         <div v-if="hoveredFactor?.id === factor.id && editingId !== factor.id" class="tooltip">
-          Added by: {{ factor.created_by }}<br />
+          Added by: {{ factor.user_name }}<br />
           {{ formatDate(factor.created_at) }}
         </div>
       </li>
