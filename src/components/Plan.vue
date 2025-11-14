@@ -154,6 +154,10 @@ onMounted(() => {
         />
       </li>
 
+      <li v-if="!isAddingNew && plans.length === 0" class="empty-state">
+        No plans yet. Click the + button to add your first plan.
+      </li>
+
       <!-- Existing plans -->
       <li
         v-for="plan in plans"
@@ -331,5 +335,11 @@ onMounted(() => {
   z-index: 10;
   margin-top: 4px;
   pointer-events: none;
+}
+
+.empty-state {
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
 }
 </style>

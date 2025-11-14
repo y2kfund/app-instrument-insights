@@ -154,6 +154,10 @@ onMounted(() => {
         />
       </li>
 
+      <li v-if="!isAddingNew && factors.length === 0" class="empty-state">
+        No factors yet. Click the + button to add your first factor.
+      </li>
+    
       <!-- Existing factors -->
       <li
         v-for="factor in factors"
@@ -331,5 +335,10 @@ onMounted(() => {
   z-index: 10;
   margin-top: 4px;
   pointer-events: none;
+}
+.empty-state {
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
 }
 </style>
