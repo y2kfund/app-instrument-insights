@@ -2,7 +2,7 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useSupabase } from '@y2kfund/core' // Adjust import path as needed
 
-interface KeyFactor {
+interface KeyPlan {
   id: string
   symbol_root: string
   bullet_text: string
@@ -19,72 +19,72 @@ interface Props {
 const props = defineProps<Props>()
 const supabase = useSupabase()
 
-const factors = ref<KeyFactor[]>([])
+const plans = ref<KeyPlan[]>([])
 const editingId = ref<string | null>(null)
 const editText = ref('')
-const hoveredFactor = ref<KeyFactor | null>(null)
+const hoveredPlan = ref<KeyPlan | null>(null)
 const isAddingNew = ref(false)
-const newFactorText = ref('')
+const newPlanText = ref('')
 
-const fetchFactors = async () => {
+const planPlans = async () => {
   const { data, error } = await supabase
     .schema('hf')
-    .from('key_factors_with_users')
+    .from('key_plan_with_users')
     .select('*')
     .eq('symbol_root', props.symbolRoot)
     .order('created_at', { ascending: false })
   
   if (!error && data) {
-    factors.value = data
+    plans.value = data
   }
 }
 
 const startAddNew = async () => {
   isAddingNew.value = true
-  newFactorText.value = ''
+  newPlanText.value = ''
   await nextTick()
-  const input = document.querySelector('.new-factor-input') as HTMLInputElement
+  const input = document.querySelector('.new-plan-input') as HTMLInputElement
   input?.focus()
 }
 
-const addFactor = async () => {
-  if (!newFactorText.value.trim()) {
+const addPlan = async () => {
+  if (!newPlanText.value.trim()) {
     isAddingNew.value = false
     return
   }
   
   const { data, error } = await supabase
     .schema('hf')
-    .from('key_factors')
+    .from('key_plan')
     .insert({
       symbol_root: props.symbolRoot,
-      bullet_text: newFactorText.value.trim(),
+      bullet_text: newPlanText.value.trim(),
       created_by: props.userId
     })
     .select()
   
   if (!error && data) {
-    factors.value.unshift(data[0])
-    newFactorText.value = ''
+    plans.value.unshift(data[0])
+    newPlanText.value = ''
     isAddingNew.value = false
   }
 }
 
 const cancelAddNew = () => {
   isAddingNew.value = false
-  newFactorText.value = ''
+  newPlanText.value = ''
 }
 
-const startEdit = async (factor: KeyFactor) => {
-  editingId.value = factor.id
-  editText.value = factor.bullet_text
+const startEdit = async (plan: KeyPlan) => {
+  editingId.value = plan.id
+  editText.value = plan.bullet_text
   await nextTick()
-  const input = document.querySelector(`#edit-${factor.id}`) as HTMLInputElement
+  const input = document.querySelector(`#edit-${plan.id}`) as HTMLInputElement
   input?.focus()
   input?.select()
 }
 
-const saveEdit = async (factorId: string) => {
+const saveEdit = async (planId: string) => {
   if (!editText.value.trim()) {
     cancelEdit()
     return
@@ -92,17 +92,17 @@ const saveEdit = async (factorId: string) => {
   
   const { error } = await supabase
     .schema('hf')
-    .from('key_factors')
+    .from('key_plan')
     .update({
       bullet_text: editText.value.trim(),
       updated_at: new Date().toISOString()
     })
-    .eq('id', factorId)
+    .eq('id', planId)
   
   if (!error) {
-    const factor = factors.value.find(f => f.id === factorId)
-    if (factor) {
-      factor.bullet_text = editText.value.trim()
+    const plan = plans.value.find(f => f.id === planId)
+    if (plan) {
+      plan.bullet_text = editText.value.trim()
     }
     editingId.value = null
   }
@@ -124,65 +124,65 @@ const formatDate = (dateString: string) => {
 }
 
 onMounted(() => {
-  fetchFactors()
+  planPlans()
 })
 </script>
 
 <template>
-  <div class="key-factors-box">
+  <div class="key-plans-box">
     <div class="header">
-      <h3 class="box-title">Key Factors</h3>
-      <button @click="startAddNew" class="add-icon-button" title="Add new factor">
+      <h3 class="box-title">Plan</h3>
+      <button @click="startAddNew" class="add-icon-button" title="Add new plan">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
     </div>
 
-    <ul class="factors-list">
-      <!-- New factor input -->
-      <li v-if="isAddingNew" class="factor-item new-factor">
+    <ul class="plans-list">
+      <!-- New plan input -->
+      <li v-if="isAddingNew" class="plan-item new-plan">
         <span class="bullet">•</span>
         <input
-          v-model="newFactorText"
-          @keyup.enter="addFactor"
+          v-model="newPlanText"
+          @keyup.enter="addPlan"
           @keyup.esc="cancelAddNew"
-          @blur="addFactor"
+          @blur="addPlan"
           type="text"
-          placeholder="Type new factor and press Enter..."
-          class="new-factor-input"
+          placeholder="Type new plan and press Enter..."
+          class="new-plan-input"
         />
       </li>
 
-      <!-- Existing factors -->
+      <!-- Existing plans -->
       <li
-        v-for="factor in factors"
-        :key="factor.id"
-        class="factor-item"
-        @mouseenter="hoveredFactor = factor"
-        @mouseleave="hoveredFactor = null"
+        v-for="plan in plans"
+        :key="plan.id"
+        class="plan-item"
+        @mouseenter="hoveredPlan = plan"
+        @mouseleave="hoveredPlan = null"
       >
         <span class="bullet">•</span>
         
-        <div v-if="editingId === factor.id" class="edit-mode">
+        <div v-if="editingId === plan.id" class="edit-mode">
           <input
-            :id="`edit-${factor.id}`"
+            :id="`edit-${plan.id}`"
             v-model="editText"
-            @keyup.enter="saveEdit(factor.id)"
+            @keyup.enter="saveEdit(plan.id)"
             @keyup.esc="cancelEdit"
-            @blur="saveEdit(factor.id)"
+            @blur="saveEdit(plan.id)"
             type="text"
             class="edit-input"
           />
         </div>
         
         <div v-else class="view-mode">
-          <span class="factor-text" @click="startEdit(factor)">{{ factor.bullet_text }}</span>
+          <span class="plan-text" @click="startEdit(plan)">{{ plan.bullet_text }}</span>
         </div>
 
-        <div v-if="hoveredFactor?.id === factor.id && editingId !== factor.id" class="tooltip">
-          Added by: {{ factor.user_name }}<br />
-          {{ formatDate(factor.created_at) }}
+        <div v-if="hoveredPlan?.id === plan.id && editingId !== plan.id" class="tooltip">
+          Added by: {{ plan.user_name }}<br />
+          {{ formatDate(plan.created_at) }}
         </div>
       </li>
     </ul>
@@ -190,9 +190,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.key-factors-box {
-  background: #e8f5e9;
-  border-left: 4px solid #4caf50;
+.key-plans-box {
+  background: #fef3e2;
+  border-left: 4px solid #ff9800;
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -221,7 +221,7 @@ onMounted(() => {
   width: 20px;
   height: 20px;
   padding: 0;
-  background-color: #4caf50;
+  background-color: #ff9800;
   color: white;
   border: none;
   border-radius: 50%;
@@ -233,7 +233,7 @@ onMounted(() => {
 }
 
 .add-icon-button:hover {
-  background-color: #388e3c;
+  background-color: #f57c00;
   transform: scale(1.1);
 }
 
@@ -241,24 +241,24 @@ onMounted(() => {
   transform: scale(0.95);
 }
 
-.factors-list {
+.plans-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.factor-item {
+.plan-item {
   display: flex;
   align-items: flex-start;
   gap: 8px;
   position: relative;
 }
 
-.factor-item:last-child {
+.plan-item:last-child {
   border-bottom: none;
 }
 
-.new-factor {
+.new-plan {
   animation: slideIn 0.2s ease;
 }
 
@@ -276,7 +276,7 @@ onMounted(() => {
 .bullet {
   font-size: 20px;
   line-height: 1 rem;
-  color: #4caf50;
+  color: #ff9800;
   flex-shrink: 0;
 }
 
@@ -284,7 +284,7 @@ onMounted(() => {
   flex: 1;
 }
 
-.factor-text {
+.plan-text {
   flex: 1;
   line-height: 1 rem;
   cursor: pointer;
@@ -293,7 +293,7 @@ onMounted(() => {
   display: block;
 }
 
-.factor-text:hover {
+.plan-text:hover {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -302,10 +302,10 @@ onMounted(() => {
 }
 
 .edit-input,
-.new-factor-input {
+.new-plan-input {
   width: 100%;
   padding: 6px 10px;
-  border: 2px solid #4caf50;
+  border: 2px solid #ff9800;
   border-radius: 4px;
   font-size: 14px;
   outline: none;
@@ -313,9 +313,9 @@ onMounted(() => {
 }
 
 .edit-input:focus,
-.new-factor-input:focus {
-  border-color: #388e3c;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+.new-plan-input:focus {
+  border-color: #f57c00;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
 }
 
 .tooltip {

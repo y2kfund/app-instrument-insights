@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import KeyFactors from '../components/KeyFactors.vue'
+import Plan from '../components/Plan.vue'
 import ComingSoonBox from '../components/ComingSoonBox.vue'
 
 interface InstrumentInsightProps {
@@ -24,7 +25,10 @@ const props = withDefaults(defineProps<InstrumentInsightProps>(), {
         :user-id="props.userId || ''"
       />
       
-      <ComingSoonBox title="Profit and Loss" />
+      <Plan 
+        :symbol-root="props.symbolRoot" 
+        :user-id="props.userId || ''"
+      />
     </div>
   </div>
 </template>
