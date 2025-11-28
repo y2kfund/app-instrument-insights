@@ -1,4 +1,4 @@
-import { defineComponent as D, ref as m, onMounted as V, createElementBlock as n, openBlock as l, createElementVNode as o, createCommentVNode as w, withDirectives as g, withKeys as f, vModelText as I, Fragment as R, renderList as q, toDisplayString as h, createTextVNode as S, nextTick as M, createVNode as T } from "vue";
+import { defineComponent as E, ref as y, onMounted as V, createElementBlock as l, openBlock as n, createElementVNode as o, createCommentVNode as w, withDirectives as g, withKeys as f, vModelText as I, Fragment as R, renderList as q, toDisplayString as h, createTextVNode as C, nextTick as S, createVNode as T } from "vue";
 import { useSupabase as F } from "@y2kfund/core";
 const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
   key: 0,
@@ -15,53 +15,53 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
 }, J = ["onClick"], Q = {
   key: 2,
   class: "tooltip"
-}, W = /* @__PURE__ */ D({
+}, W = /* @__PURE__ */ E({
   __name: "KeyFactors",
   props: {
     symbolRoot: {},
     userId: {}
   },
   setup(p) {
-    const u = p, y = F(), i = m([]), d = m(null), a = m(""), b = m(null), c = m(!1), r = m(""), C = async () => {
-      const { data: t, error: e } = await y.schema("hf").from("key_factors_with_users").select("*").eq("symbol_root", u.symbolRoot).order("created_at", { ascending: !1 });
+    const u = p, _ = F(), i = y([]), d = y(null), a = y(""), b = y(null), c = y(!1), r = y(""), M = async () => {
+      const { data: t, error: e } = await _.schema("hf").from("key_factors_with_users").select("*").eq("symbol_root", u.symbolRoot).order("created_at", { ascending: !1 });
       !e && t && (i.value = t);
     }, N = async () => {
-      c.value = !0, r.value = "", await M();
+      c.value = !0, r.value = "", await S();
       const t = document.querySelector(".new-factor-input");
       t == null || t.focus();
-    }, k = async () => {
+    }, x = async () => {
       if (!r.value.trim()) {
         c.value = !1;
         return;
       }
-      const { data: t, error: e } = await y.schema("hf").from("key_factors").insert({
+      const { data: t, error: e } = await _.schema("hf").from("key_factors").insert({
         symbol_root: u.symbolRoot,
         bullet_text: r.value.trim(),
         created_by: u.userId
       }).select();
       !e && t && (i.value.unshift(t[0]), r.value = "", c.value = !1);
-    }, A = () => {
+    }, B = () => {
       c.value = !1, r.value = "";
-    }, E = async (t) => {
-      d.value = t.id, a.value = t.bullet_text, await M();
+    }, A = async (t) => {
+      d.value = t.id, a.value = t.bullet_text, await S();
       const e = document.querySelector(`#edit-${t.id}`);
       e == null || e.focus(), e == null || e.select();
-    }, x = async (t) => {
+    }, k = async (t) => {
       if (!a.value.trim()) {
         $();
         return;
       }
-      const { error: e } = await y.schema("hf").from("key_factors").update({
+      const { error: e } = await _.schema("hf").from("key_factors").update({
         bullet_text: a.value.trim(),
         updated_at: (/* @__PURE__ */ new Date()).toISOString()
       }).eq("id", t);
       if (!e) {
-        const s = i.value.find((_) => _.id === t);
+        const s = i.value.find((v) => v.id === t);
         s && (s.bullet_text = a.value.trim()), d.value = null;
       }
     }, $ = () => {
       d.value = null, a.value = "";
-    }, B = (t) => new Date(t).toLocaleDateString("en-US", {
+    }, D = (t) => new Date(t).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -69,8 +69,8 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
       minute: "2-digit"
     });
     return V(() => {
-      C();
-    }), (t, e) => (l(), n("div", P, [
+      M();
+    }), (t, e) => (n(), l("div", P, [
       o("div", { class: "header" }, [
         e[4] || (e[4] = o("h3", { class: "box-title" }, "Key Factors", -1)),
         o("button", {
@@ -94,15 +94,15 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
         ])])
       ]),
       o("ul", U, [
-        c.value ? (l(), n("li", L, [
+        c.value ? (n(), l("li", L, [
           e[5] || (e[5] = o("span", { class: "bullet" }, "•", -1)),
           g(o("input", {
             "onUpdate:modelValue": e[0] || (e[0] = (s) => r.value = s),
             onKeyup: [
-              f(k, ["enter"]),
-              f(A, ["esc"])
+              f(x, ["enter"]),
+              f(B, ["esc"])
             ],
-            onBlur: k,
+            onBlur: x,
             type: "text",
             placeholder: "Type new factor and press Enter...",
             class: "new-factor-input"
@@ -110,40 +110,40 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
             [I, r.value]
           ])
         ])) : w("", !0),
-        !c.value && i.value.length === 0 ? (l(), n("li", O, " No factors yet. Click the + button to add your first factor. ")) : w("", !0),
-        (l(!0), n(R, null, q(i.value, (s) => {
-          var _;
-          return l(), n("li", {
+        !c.value && i.value.length === 0 ? (n(), l("li", O, " No factors yet. Click the + button to add your first factor. ")) : w("", !0),
+        (n(!0), l(R, null, q([...i.value].sort((s, v) => s.bullet_text.localeCompare(v.bullet_text)), (s) => {
+          var v;
+          return n(), l("li", {
             key: s.id,
             class: "factor-item",
-            onMouseenter: (v) => b.value = s,
-            onMouseleave: e[2] || (e[2] = (v) => b.value = null)
+            onMouseenter: (m) => b.value = s,
+            onMouseleave: e[2] || (e[2] = (m) => b.value = null)
           }, [
             e[7] || (e[7] = o("span", { class: "bullet" }, "•", -1)),
-            d.value === s.id ? (l(), n("div", j, [
+            d.value === s.id ? (n(), l("div", j, [
               g(o("input", {
                 id: `edit-${s.id}`,
-                "onUpdate:modelValue": e[1] || (e[1] = (v) => a.value = v),
+                "onUpdate:modelValue": e[1] || (e[1] = (m) => a.value = m),
                 onKeyup: [
-                  f((v) => x(s.id), ["enter"]),
+                  f((m) => k(s.id), ["enter"]),
                   f($, ["esc"])
                 ],
-                onBlur: (v) => x(s.id),
+                onBlur: (m) => k(s.id),
                 type: "text",
                 class: "edit-input"
               }, null, 40, z), [
                 [I, a.value]
               ])
-            ])) : (l(), n("div", G, [
+            ])) : (n(), l("div", G, [
               o("span", {
                 class: "factor-text",
-                onClick: (v) => E(s)
+                onClick: (m) => A(s)
               }, h(s.bullet_text), 9, J)
             ])),
-            ((_ = b.value) == null ? void 0 : _.id) === s.id && d.value !== s.id ? (l(), n("div", Q, [
-              S(" Added by: " + h(s.user_name), 1),
+            ((v = b.value) == null ? void 0 : v.id) === s.id && d.value !== s.id ? (n(), l("div", Q, [
+              C(" Added by: " + h(s.user_name), 1),
               e[6] || (e[6] = o("br", null, null, -1)),
-              S(" " + h(B(s.created_at)), 1)
+              C(" " + h(D(s.created_at)), 1)
             ])) : w("", !0)
           ], 40, H);
         }), 128))
@@ -151,11 +151,11 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
     ]));
   }
 }), K = (p, u) => {
-  const y = p.__vccOpts || p;
+  const _ = p.__vccOpts || p;
   for (const [i, d] of u)
-    y[i] = d;
-  return y;
-}, X = /* @__PURE__ */ K(W, [["__scopeId", "data-v-c5fae2e1"]]), Y = { class: "key-plans-box" }, Z = { class: "plans-list" }, ee = {
+    _[i] = d;
+  return _;
+}, X = /* @__PURE__ */ K(W, [["__scopeId", "data-v-8992fbb8"]]), Y = { class: "key-plans-box" }, Z = { class: "plans-list" }, ee = {
   key: 0,
   class: "plan-item new-plan"
 }, te = {
@@ -164,59 +164,59 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
 }, se = ["onMouseenter"], oe = {
   key: 0,
   class: "edit-mode"
-}, ne = ["id", "onKeyup", "onBlur"], le = {
+}, le = ["id", "onKeyup", "onBlur"], ne = {
   key: 1,
   class: "view-mode"
 }, ae = ["onClick"], re = {
   key: 2,
   class: "tooltip"
-}, ue = /* @__PURE__ */ D({
+}, ue = /* @__PURE__ */ E({
   __name: "Plan",
   props: {
     symbolRoot: {},
     userId: {}
   },
   setup(p) {
-    const u = p, y = F(), i = m([]), d = m(null), a = m(""), b = m(null), c = m(!1), r = m(""), C = async () => {
-      const { data: t, error: e } = await y.schema("hf").from("key_plan_with_users").select("*").eq("symbol_root", u.symbolRoot).order("created_at", { ascending: !1 });
+    const u = p, _ = F(), i = y([]), d = y(null), a = y(""), b = y(null), c = y(!1), r = y(""), M = async () => {
+      const { data: t, error: e } = await _.schema("hf").from("key_plan_with_users").select("*").eq("symbol_root", u.symbolRoot).order("created_at", { ascending: !1 });
       !e && t && (i.value = t);
     }, N = async () => {
-      c.value = !0, r.value = "", await M();
+      c.value = !0, r.value = "", await S();
       const t = document.querySelector(".new-plan-input");
       t == null || t.focus();
-    }, k = async () => {
+    }, x = async () => {
       if (!r.value.trim()) {
         c.value = !1;
         return;
       }
-      const { data: t, error: e } = await y.schema("hf").from("key_plan").insert({
+      const { data: t, error: e } = await _.schema("hf").from("key_plan").insert({
         symbol_root: u.symbolRoot,
         bullet_text: r.value.trim(),
         created_by: u.userId
       }).select();
       !e && t && (i.value.unshift(t[0]), r.value = "", c.value = !1);
-    }, A = () => {
+    }, B = () => {
       c.value = !1, r.value = "";
-    }, E = async (t) => {
-      d.value = t.id, a.value = t.bullet_text, await M();
+    }, A = async (t) => {
+      d.value = t.id, a.value = t.bullet_text, await S();
       const e = document.querySelector(`#edit-${t.id}`);
       e == null || e.focus(), e == null || e.select();
-    }, x = async (t) => {
+    }, k = async (t) => {
       if (!a.value.trim()) {
         $();
         return;
       }
-      const { error: e } = await y.schema("hf").from("key_plan").update({
+      const { error: e } = await _.schema("hf").from("key_plan").update({
         bullet_text: a.value.trim(),
         updated_at: (/* @__PURE__ */ new Date()).toISOString()
       }).eq("id", t);
       if (!e) {
-        const s = i.value.find((_) => _.id === t);
+        const s = i.value.find((v) => v.id === t);
         s && (s.bullet_text = a.value.trim()), d.value = null;
       }
     }, $ = () => {
       d.value = null, a.value = "";
-    }, B = (t) => new Date(t).toLocaleDateString("en-US", {
+    }, D = (t) => new Date(t).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -224,8 +224,8 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
       minute: "2-digit"
     });
     return V(() => {
-      C();
-    }), (t, e) => (l(), n("div", Y, [
+      M();
+    }), (t, e) => (n(), l("div", Y, [
       o("div", { class: "header" }, [
         e[4] || (e[4] = o("h3", { class: "box-title" }, "Plan", -1)),
         o("button", {
@@ -249,15 +249,15 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
         ])])
       ]),
       o("ul", Z, [
-        c.value ? (l(), n("li", ee, [
+        c.value ? (n(), l("li", ee, [
           e[5] || (e[5] = o("span", { class: "bullet" }, "•", -1)),
           g(o("input", {
             "onUpdate:modelValue": e[0] || (e[0] = (s) => r.value = s),
             onKeyup: [
-              f(k, ["enter"]),
-              f(A, ["esc"])
+              f(x, ["enter"]),
+              f(B, ["esc"])
             ],
-            onBlur: k,
+            onBlur: x,
             type: "text",
             placeholder: "Type new plan and press Enter...",
             class: "new-plan-input"
@@ -265,55 +265,55 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
             [I, r.value]
           ])
         ])) : w("", !0),
-        !c.value && i.value.length === 0 ? (l(), n("li", te, " No plans yet. Click the + button to add your first plan. ")) : w("", !0),
-        (l(!0), n(R, null, q(i.value, (s) => {
-          var _;
-          return l(), n("li", {
+        !c.value && i.value.length === 0 ? (n(), l("li", te, " No plans yet. Click the + button to add your first plan. ")) : w("", !0),
+        (n(!0), l(R, null, q([...i.value].sort((s, v) => s.bullet_text.localeCompare(v.bullet_text)), (s) => {
+          var v;
+          return n(), l("li", {
             key: s.id,
             class: "plan-item",
-            onMouseenter: (v) => b.value = s,
-            onMouseleave: e[2] || (e[2] = (v) => b.value = null)
+            onMouseenter: (m) => b.value = s,
+            onMouseleave: e[2] || (e[2] = (m) => b.value = null)
           }, [
             e[7] || (e[7] = o("span", { class: "bullet" }, "•", -1)),
-            d.value === s.id ? (l(), n("div", oe, [
+            d.value === s.id ? (n(), l("div", oe, [
               g(o("input", {
                 id: `edit-${s.id}`,
-                "onUpdate:modelValue": e[1] || (e[1] = (v) => a.value = v),
+                "onUpdate:modelValue": e[1] || (e[1] = (m) => a.value = m),
                 onKeyup: [
-                  f((v) => x(s.id), ["enter"]),
+                  f((m) => k(s.id), ["enter"]),
                   f($, ["esc"])
                 ],
-                onBlur: (v) => x(s.id),
+                onBlur: (m) => k(s.id),
                 type: "text",
                 class: "edit-input"
-              }, null, 40, ne), [
+              }, null, 40, le), [
                 [I, a.value]
               ])
-            ])) : (l(), n("div", le, [
+            ])) : (n(), l("div", ne, [
               o("span", {
                 class: "plan-text",
-                onClick: (v) => E(s)
+                onClick: (m) => A(s)
               }, h(s.bullet_text), 9, ae)
             ])),
-            ((_ = b.value) == null ? void 0 : _.id) === s.id && d.value !== s.id ? (l(), n("div", re, [
-              S(" Added by: " + h(s.user_name), 1),
+            ((v = b.value) == null ? void 0 : v.id) === s.id && d.value !== s.id ? (n(), l("div", re, [
+              C(" Added by: " + h(s.user_name), 1),
               e[6] || (e[6] = o("br", null, null, -1)),
-              S(" " + h(B(s.created_at)), 1)
+              C(" " + h(D(s.created_at)), 1)
             ])) : w("", !0)
           ], 40, se);
         }), 128))
       ])
     ]));
   }
-}), ie = /* @__PURE__ */ K(ue, [["__scopeId", "data-v-369049b3"]]), de = { class: "instrument-insights-for-single-instrument-view" }, ce = { class: "boxes-container" }, ve = /* @__PURE__ */ D({
+}), ie = /* @__PURE__ */ K(ue, [["__scopeId", "data-v-76bfbd19"]]), de = { class: "instrument-insights-for-single-instrument-view" }, ce = { class: "boxes-container" }, ve = /* @__PURE__ */ E({
   __name: "InstrumentInsight",
   props: {
-    symbolRoot: { default: "META" },
-    userId: { default: "67e578fd-2cf7-48a4-b028-a11a3f89bb9b" }
+    symbolRoot: { default: "IBIT" },
+    userId: { default: "4fbec15d-2316-4805-b2a4-5cd2115a5ac8" }
   },
   setup(p) {
     const u = p;
-    return (y, i) => (l(), n("div", de, [
+    return (_, i) => (n(), l("div", de, [
       o("div", ce, [
         T(X, {
           "symbol-root": u.symbolRoot,
@@ -326,7 +326,7 @@ const P = { class: "key-factors-box" }, U = { class: "factors-list" }, L = {
       ])
     ]));
   }
-}), _e = /* @__PURE__ */ K(ve, [["__scopeId", "data-v-c6688f6e"]]);
+}), _e = /* @__PURE__ */ K(ve, [["__scopeId", "data-v-79452f88"]]);
 export {
   _e as InstrumentInsight,
   _e as default

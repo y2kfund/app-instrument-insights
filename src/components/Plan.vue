@@ -160,7 +160,7 @@ onMounted(() => {
 
       <!-- Existing plans -->
       <li
-        v-for="plan in plans"
+        v-for="plan in [...plans].sort((a, b) => a.bullet_text.localeCompare(b.bullet_text))"
         :key="plan.id"
         class="plan-item"
         @mouseenter="hoveredPlan = plan"

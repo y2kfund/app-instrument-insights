@@ -160,7 +160,7 @@ onMounted(() => {
     
       <!-- Existing factors -->
       <li
-        v-for="factor in factors"
+        v-for="factor in [...factors].sort((a, b) => a.bullet_text.localeCompare(b.bullet_text))"
         :key="factor.id"
         class="factor-item"
         @mouseenter="hoveredFactor = factor"

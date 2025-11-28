@@ -10,8 +10,8 @@ interface InstrumentInsightProps {
 }
 
 const props = withDefaults(defineProps<InstrumentInsightProps>(), {
-  symbolRoot: 'META',
-  userId: '67e578fd-2cf7-48a4-b028-a11a3f89bb9b'
+  symbolRoot: 'IBIT',
+  userId: '4fbec15d-2316-4805-b2a4-5cd2115a5ac8'
 })
 
 </script>
